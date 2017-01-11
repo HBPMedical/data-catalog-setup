@@ -10,4 +10,4 @@ This project contains the model and migration scripts needed to deploy the mri-m
 
 ## Usage
 
-Write a configuration file called `alembic.ini` based on `alembic.ini.sample`, `cd` db_migrations folder and run `alembic upgrade HEAD`. 
+Write a configuration file called `alembic.ini` based on `alembic.ini.sample`, `cd` db_migrations folder and run `alembic upgrade head`. 
