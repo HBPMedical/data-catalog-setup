@@ -13,10 +13,10 @@ class Check(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     quality_check_id = Column(ForeignKey('quality_check.id'), nullable=False, index=True)
-    nifti_id = Column(ForeignKey('nifti.id'), nullable=False, index=True)
+    data_file_id = Column(ForeignKey('data_file.id'), nullable=False, index=True)
     value = Column(Float, nullable=False)
 
-    nifti = relationship('Nifti')
+    data_file = relationship('DataFile')
     quality_check = relationship('QualityCheck')
 
 
