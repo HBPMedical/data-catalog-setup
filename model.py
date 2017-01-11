@@ -52,8 +52,9 @@ class DataFile(Base):
     repetition_id = Column(ForeignKey('repetition.id'), nullable=False, index=True)
     processing_step_id = Column(ForeignKey('processing_step.id'), nullable=False, index=True)
     path = Column(Text, nullable=False)
-    result_type = Column(String(255), nullable=False)
-    output_type = Column(String(255), nullable=False)
+    type = Column(Text, nullable=False)
+    result_type = Column(String(255), nullable=True)
+    output_type = Column(String(255), nullable=True)
 
     repetition = relationship('Repetition')
     processing_step = relationship('ProcessingStep')
