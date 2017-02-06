@@ -2,7 +2,8 @@
 
 # Data Catalog DB
 
-This project contains the model and migration scripts needed to deploy the data-catalog-db. This database is used to store metadata extracted mainly from DICOM files in the Data Factory.
+This project contains the model and migration scripts needed to deploy the data-catalog-db. 
+This database is used to store metadata mostly extracted from DICOM files in the Data Factory.
 
 ## Prerequisites
 
@@ -10,12 +11,12 @@ This project contains the model and migration scripts needed to deploy the data-
 
 ## Usage
 
-Write a configuration file called `alembic.ini` based on `alembic.ini.sample`, `cd` db_migrations folder and run `alembic upgrade head`. 
+Run `alembic upgrade head`.
 
 ## Tests
 
-A test script is available in the tests directory. It is written for CircleCI but you can run it manually if needed.
+Open the tests directory and run `./test.sh`.
 
-Note that there are some prerequisites for that :
-* A Postgres instance has to be running (following tests/alembic.ini.test configuration)
-* Alembic and Psycopg2 have to be installed
+NOTE: This will launch a Docker container with a Postgres instance on the port 5432. On CircleCI,
+it does not launch a Docker container but connects to a local Postgres instance. If you don't want to
+use Docker, you can define this environment variable: `CIRCLE_CI=True`
