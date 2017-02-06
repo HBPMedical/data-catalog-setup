@@ -16,7 +16,7 @@ from alembic.config import Config
 config = Config(MRIDB_FOLDER+"/alembic.ini")
 
 sys.path.append(MRIDB_FOLDER)
-from model import Base
+from data_catalog_schema import Base
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
