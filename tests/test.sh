@@ -1,26 +1,36 @@
 #!/usr/bin/env bash
 
-# Start DB container (if not on CircleCI)
-echo "Starting DB container..."
 if [ -z "$CIRCLECI" ] || [ "$CIRCLECI" = false ] ; then
-    db_docker_id=$(docker run -d -p 5432:5432 -e 'POSTGRES_PASSWORD=postgres' postgres)
 
-    # Wait for DB to be ready
-    echo "Waiting for DB to be ready..."
-    sleep 5  # TODO: replace this by a test
-fi
+    # Start DB container
+    echo "Starting container..."
+    db_docker_id=$(docker run -d hbpmip/data-catalog-db)
 
-echo "Changing directory..."
-cd ..
-echo "Running alembic migration..."
-alembic upgrade head
-ret=$?
+    # Query database
+    echo "Waiting for the DB to be ready..."
+    sleep 5
+    out=$(docker exec -ti ${db_docker_id} bash -c "psql -U postgres -c \"\dt\" | grep alembic_version")
+    ret=${#out}
 
-# Remove DB container (if not on CircleCI)
-if [ -z "$CIRCLECI" ] || [ "$CIRCLECI" = false ] ; then
+    # Remove DB container
     echo "Removing DB container..."
     docker kill ${db_docker_id}
     docker rm -f ${db_docker_id}
-fi
 
-exit "$ret"
+    # Exit
+    if [ $ret -eq 48 ]
+    then
+      exit 0
+    else
+      exit 1
+    fi
+
+else
+
+    # Do not use Docker on CircleCI because it uses LXC driver
+    echo "Changing directory..."
+    cd ..
+    echo "Running alembic migration..."
+    alembic upgrade head
+    exit $?
+fi

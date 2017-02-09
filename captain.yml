@@ -1,0 +1,9 @@
+data-catalog-db:
+  build: Dockerfile
+  image: hbpmip/data-catalog-db
+  pre:
+    - echo "Building hbpmip/data-catalog-db image"
+  post:
+    - echo "Finished building hbpmip/data-catalog-db image"
+  test:
+    - ./tests/test.sh
