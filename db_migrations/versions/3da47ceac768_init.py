@@ -1,12 +1,13 @@
 """init
 
-Revision ID: 5f21787be866
-Create Date: 2017-02-13 11:49:24.304355
+Revision ID: 3da47ceac768
+Revises: 
+Create Date: 2017-02-13 16:47:16.371746
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '5f21787be866'
+revision = '3da47ceac768'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -53,17 +54,17 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('participant',
-    sa.Column('id', sa.VARCHAR(length=200), nullable=False),
-    sa.Column('gender', sa.Enum('male', 'female', 'other', 'unknown', name='gender'), nullable=True),
-    sa.Column('handedness', sa.Enum('left', 'right', 'ambidexter', 'unknown', name='handedness'), nullable=True),
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=200), nullable=False),
+    sa.Column('gender', sa.Enum('M', 'F', 'O', name='gender'), nullable=True),
+    sa.Column('handedness', sa.Enum('left', 'right', 'ambidexter', name='handedness'), nullable=True),
     sa.Column('birthdate', sa.DATE(), nullable=True),
     sa.Column('age', sa.DECIMAL(), nullable=True),
     sa.Column('provenance_id', sa.INTEGER(), nullable=False),
-    sa.Column('index_id', sa.INTEGER(), nullable=False),
     sa.ForeignKeyConstraint(['provenance_id'], ['provenance.id'], ),
-    sa.PrimaryKeyConstraint('id', 'provenance_id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'provenance_id')
     )
-    op.create_index(op.f('ix_participant_index_id'), 'participant', ['index_id'], unique=True)
     op.create_table('processing_step',
     sa.Column('id', sa.INTEGER(), nullable=False),
     sa.Column('previous_step_id', sa.INTEGER(), nullable=True),
@@ -75,46 +76,46 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('scan',
-    sa.Column('id', sa.VARCHAR(length=200), nullable=False),
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=200), nullable=False),
     sa.Column('date', sa.DATE(), nullable=True),
-    sa.Column('role', sa.Enum('C', 'P', 'IC', 'U', name='scan_role'), nullable=True),
+    sa.Column('role', sa.Enum('C', 'P', 'IC', name='scan_role'), nullable=True),
     sa.Column('comment', sa.TEXT(), nullable=True),
     sa.Column('participant_id', sa.INTEGER(), nullable=False),
     sa.Column('provenance_id', sa.INTEGER(), nullable=False),
-    sa.Column('index_id', sa.INTEGER(), nullable=False),
-    sa.ForeignKeyConstraint(['participant_id'], ['participant.index_id'], ),
+    sa.ForeignKeyConstraint(['participant_id'], ['participant.id'], ),
     sa.ForeignKeyConstraint(['provenance_id'], ['provenance.id'], ),
-    sa.PrimaryKeyConstraint('id', 'provenance_id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'provenance_id')
     )
-    op.create_index(op.f('ix_scan_index_id'), 'scan', ['index_id'], unique=True)
     op.create_table('session',
+    sa.Column('id', sa.INTEGER(), nullable=False),
     sa.Column('name', sa.VARCHAR(length=200), nullable=False),
     sa.Column('scan_id', sa.INTEGER(), nullable=False),
     sa.Column('date', sa.DATE(), nullable=True),
-    sa.Column('index_id', sa.INTEGER(), nullable=False),
-    sa.ForeignKeyConstraint(['scan_id'], ['scan.index_id'], ),
-    sa.PrimaryKeyConstraint('name', 'scan_id')
+    sa.ForeignKeyConstraint(['scan_id'], ['scan.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'scan_id')
     )
-    op.create_index(op.f('ix_session_index_id'), 'session', ['index_id'], unique=True)
     op.create_table('sequence',
+    sa.Column('id', sa.INTEGER(), nullable=False),
     sa.Column('name', sa.VARCHAR(length=50), nullable=False),
     sa.Column('session_id', sa.INTEGER(), nullable=False),
-    sa.Column('sequence_type_id', sa.INTEGER(), nullable=False),
-    sa.Column('index_id', sa.INTEGER(), nullable=False),
+    sa.Column('sequence_type_id', sa.INTEGER(), nullable=True),
     sa.ForeignKeyConstraint(['sequence_type_id'], ['sequence_type.id'], ),
-    sa.ForeignKeyConstraint(['session_id'], ['session.index_id'], ),
-    sa.PrimaryKeyConstraint('name', 'session_id')
+    sa.ForeignKeyConstraint(['session_id'], ['session.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'session_id')
     )
-    op.create_index(op.f('ix_sequence_index_id'), 'sequence', ['index_id'], unique=True)
     op.create_table('repetition',
-    sa.Column('name', sa.VARCHAR(length=50), nullable=False),
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('number', sa.INTEGER(), nullable=False),
     sa.Column('sequence_id', sa.INTEGER(), nullable=False),
     sa.Column('date', sa.DATE(), nullable=True),
-    sa.Column('index_id', sa.INTEGER(), nullable=False),
-    sa.ForeignKeyConstraint(['sequence_id'], ['sequence.index_id'], ),
-    sa.PrimaryKeyConstraint('name', 'sequence_id')
+    sa.ForeignKeyConstraint(['sequence_id'], ['sequence.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('number', 'sequence_id')
     )
-    op.create_index(op.f('ix_repetition_index_id'), 'repetition', ['index_id'], unique=True)
     op.create_table('data_file',
     sa.Column('id', sa.INTEGER(), nullable=False),
     sa.Column('repetition_id', sa.INTEGER(), nullable=True),
@@ -125,7 +126,7 @@ def upgrade():
     sa.Column('output_type', sa.VARCHAR(length=50), nullable=True),
     sa.Column('is_copy', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['processing_step_id'], ['processing_step.id'], ),
-    sa.ForeignKeyConstraint(['repetition_id'], ['repetition.index_id'], ),
+    sa.ForeignKeyConstraint(['repetition_id'], ['repetition.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('path')
     )
@@ -135,16 +136,11 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('data_file')
-    op.drop_index(op.f('ix_repetition_index_id'), table_name='repetition')
     op.drop_table('repetition')
-    op.drop_index(op.f('ix_sequence_index_id'), table_name='sequence')
     op.drop_table('sequence')
-    op.drop_index(op.f('ix_session_index_id'), table_name='session')
     op.drop_table('session')
-    op.drop_index(op.f('ix_scan_index_id'), table_name='scan')
     op.drop_table('scan')
     op.drop_table('processing_step')
-    op.drop_index(op.f('ix_participant_index_id'), table_name='participant')
     op.drop_table('participant')
     op.drop_table('sequence_type')
     op.drop_table('provenance')
