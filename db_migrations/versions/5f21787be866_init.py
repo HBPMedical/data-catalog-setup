@@ -1,7 +1,6 @@
 """init
 
 Revision ID: 5f21787be866
-Revises: 
 Create Date: 2017-02-13 11:49:24.304355
 
 """
