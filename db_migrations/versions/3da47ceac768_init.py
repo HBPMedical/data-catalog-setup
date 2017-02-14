@@ -1,7 +1,6 @@
 """init
 
-Revision ID: 3da47ceac768
-Revises: 
+Revision ID: 3da47ceac768 
 Create Date: 2017-02-13 16:47:16.371746
 
 """
