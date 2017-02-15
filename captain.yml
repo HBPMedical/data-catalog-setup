@@ -1,9 +1,9 @@
-data-catalog-db:
+data-catalog-setup:
   build: Dockerfile
-  image: hbpmip/data-catalog-db
+  image: hbpmip/data-catalog-setup
   pre:
-    - echo "Building hbpmip/data-catalog-db image"
+    - echo "Building hbpmip/data-catalog-setup image"
   post:
-    - echo "Finished building hbpmip/data-catalog-db image"
+    - echo "Finished building hbpmip/data-catalog-setup image"
   test:
     - ./tests/test.sh

@@ -1,20 +1,40 @@
-FROM postgres:9.6.1
+FROM python:3.6.0
 
 MAINTAINER mirco.nasuti@chuv.ch
 
 
-COPY data_catalog_schema.py /
-COPY alembic.ini /
+########################################################################################################################
+# Install Alembic and Psycopg2
+########################################################################################################################
+
+RUN pip install --no-cache-dir 'alembic==0.8.10' 'psycopg2==2.6.2'
+
+
+########################################################################################################################
+# Install Dockerize
+########################################################################################################################
+
+RUN apt-get update && apt-get install -y wget
+
+ENV DOCKERIZE_VERSION 'v0.3.0'
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+
+########################################################################################################################
+# Copy project files
+########################################################################################################################
+
+COPY alembic.ini.tmpl /alembic.ini.tmpl
+COPY data_catalog_schema.py /data_catalog_schema.py
 COPY db_migrations/ /db_migrations/
-COPY migrate.sh /docker-entrypoint-initdb.d/
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        'python3=3.4.2-2' \
-        'python3-dev=3.4.2-2' \
-        'python3-pip=1.5.6-5' \
-        'build-essential=11.7' \
-        'postgresql-server-dev-9.6=9.6.2-1.pgdg80+1' \
-    && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install 'alembic==0.8.10' 'psycopg2==2.6.2'
+########################################################################################################################
+# Setup entrypoint and cmd
+########################################################################################################################
+
+WORKDIR /
+ENTRYPOINT ["dockerize", "-template", "/alembic.ini.tmpl:/alembic.ini", "alembic"]
+CMD ["help"]

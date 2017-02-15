@@ -1,36 +1,20 @@
 #!/usr/bin/env bash
 
+echo "Starting a Postgres container..."
+postgres_container=$(docker run -d -p 5432:5432 postgres)
+sleep 5
+
+# Get gateway IP
+echo "Searching for gateway IP..."
+GATEWAY_IP=$(ip addr | grep docker | grep inet | grep -Eo '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')
+
+echo "Running a migration..."
+docker run --rm -e "DB_URL=postgresql://postgres:postgres@$GATEWAY_IP:5432/postgres" hbpmip/data-catalog-setup upgrade head
+ret=$?
+
 if [ -z "$CIRCLECI" ] || [ "$CIRCLECI" = false ] ; then
-
-    # Start DB container
-    echo "Starting container..."
-    db_docker_id=$(docker run -d hbpmip/data-catalog-db)
-
-    # Query database
-    echo "Waiting for the DB to be ready..."
-    sleep 5
-    out=$(docker exec -ti ${db_docker_id} bash -c "psql -U postgres -c \"\dt\" | grep alembic_version")
-    ret=${#out}
-
-    # Remove DB container
-    echo "Removing DB container..."
-    docker kill ${db_docker_id}
-    docker rm -f ${db_docker_id}
-
-    # Exit
-    if [ $ret -eq 48 ]
-    then
-      exit 0
-    else
-      exit 1
-    fi
-
-else
-
-    # Do not use Docker on CircleCI because it uses LXC driver
-    echo "Changing directory..."
-    cd ..
-    echo "Running alembic migration..."
-    alembic upgrade head
-    exit $?
+    echo "Removing the Postgres container..."
+    docker rm -f ${postgres_container}
 fi
+
+exit $ret
