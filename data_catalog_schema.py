@@ -21,46 +21,50 @@ class Provenance(Base):
     fn_version = Column(VARCHAR(50))
     others = Column(TEXT)
 
+    unique_constraint = UniqueConstraint(
+        dataset, matlab_version, spm_version, spm_revision, fn_called, fn_version, others)
+
 
 class ProcessingStep(Base):
     __tablename__ = 'processing_step'
 
     id = Column(INTEGER, primary_key=True)
-    previous_step_id = Column(ForeignKey('processing_step.id'))
-    provenance_id = Column(ForeignKey('provenance.id'), nullable=False)
     name = Column(VARCHAR(200), nullable=False)
+    provenance_id = Column(ForeignKey('provenance.id'), nullable=False)
+    previous_step_id = Column(ForeignKey('processing_step.id'))
     execution_date = Column(DATE)
 
-    processing_step = relationship('ProcessingStep')
+    unique_constraint = UniqueConstraint(name, provenance_id)
+
     provenance = relationship('Provenance')
+    processing_step = relationship('ProcessingStep')
 
 
 class DataFile(Base):
     __tablename__ = 'data_file'
 
     id = Column(INTEGER, primary_key=True)
-    repetition_id = Column(ForeignKey('repetition.id'))
-    processing_step_id = Column(ForeignKey('processing_step.id'), nullable=False)
     path = Column(TEXT, unique=True, nullable=False)
     type = Column(VARCHAR(50), nullable=False)
-    result_type = Column(VARCHAR(50))
-    output_type = Column(VARCHAR(50))
+    processing_step_id = Column(ForeignKey('processing_step.id'), nullable=False)
+    repetition_id = Column(ForeignKey('repetition.id'))
     is_copy = Column(Boolean)
 
-    repetition = relationship('Repetition')
     processing_step = relationship('ProcessingStep')
+    repetition = relationship('Repetition')
 
 
 class Repetition(Base):
     __tablename__ = 'repetition'
 
     id = Column(INTEGER, primary_key=True)
-    number = Column(INTEGER, nullable=False)
+    name = Column(VARCHAR(50), nullable=False)
     sequence_id = Column(ForeignKey('sequence.id'), nullable=False)
     date = Column(DATE)
 
+    unique_constraint = UniqueConstraint(name, sequence_id)
+
     sequence = relationship('Sequence')
-    unique_constraint = UniqueConstraint(number, sequence_id)
 
 
 class Sequence(Base):
@@ -71,9 +75,10 @@ class Sequence(Base):
     session_id = Column(ForeignKey('session.id'), nullable=False)
     sequence_type_id = Column(ForeignKey('sequence_type.id'))
 
+    unique_constraint = UniqueConstraint(name, session_id)
+
     sequence_type = relationship('SequenceType')
     session = relationship('Session')
-    unique_constraint = UniqueConstraint(name, session_id)
 
 
 class SequenceType(Base):
@@ -106,40 +111,47 @@ class Session(Base):
     __tablename__ = 'session'
 
     id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(200), nullable=False)
-    scan_id = Column(ForeignKey('scan.id'), nullable=False)
+    name = Column(VARCHAR(50), nullable=False)
+    visit_id = Column(ForeignKey('visit.id'), nullable=False)
     date = Column(DATE)
 
-    scan = relationship('Scan')
-    unique_constraint = UniqueConstraint(name, scan_id)
+    unique_constraint = UniqueConstraint(name, visit_id)
+
+    visit = relationship('Visit')
 
 
-class Scan(Base):
-    __tablename__ = 'scan'
+class Visit(Base):
+    __tablename__ = 'visit'
 
-    id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(200), nullable=False)
+    id = Column(INTEGER, primary_key=True, autoincrement=False)
     date = Column(DATE)
-    role = Column(Enum('C', 'P', 'IC', name='scan_role'))
+    role = Column(Enum('C', 'P', 'IC', name='participant_role'))
     comment = Column(TEXT)
     participant_id = Column(ForeignKey('participant.id'), nullable=False)
-    provenance_id = Column(ForeignKey('provenance.id'), nullable=False)
 
     participant = relationship('Participant')
-    provenance = relationship('Provenance')
-    unique_constraint = UniqueConstraint(name, provenance_id)
 
 
 class Participant(Base):
     __tablename__ = 'participant'
 
-    id = Column(INTEGER, primary_key=True)
-    name = Column(VARCHAR(200), nullable=False)
+    id = Column(INTEGER, primary_key=True, autoincrement=False)
     gender = Column(Enum('M', 'F', 'O', name='gender'))
-    handedness = Column(Enum('left', 'right', 'ambidexter', name='handedness'))
-    birthdate = Column(DATE)
+    birth_date = Column(DATE)
     age = Column(DECIMAL)
-    provenance_id = Column(ForeignKey('provenance.id'), nullable=False)
 
-    provenance = relationship('Provenance')
-    unique_constraint = UniqueConstraint(name, provenance_id)
+
+class VisitMapping(Base):
+    __tablename__ = 'visit_mapping'
+
+    name = Column(VARCHAR(50), primary_key=True)
+    dataset = Column(VARCHAR(50), primary_key=True)
+    visit_id = Column(INTEGER, unique=True)
+
+
+class ParticipantMapping(Base):
+    __tablename__ = 'participant_mapping'
+
+    name = Column(VARCHAR(50), primary_key=True)
+    dataset = Column(VARCHAR(50), primary_key=True)
+    participant_id = Column(INTEGER, unique=True)
