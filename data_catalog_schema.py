@@ -125,6 +125,7 @@ class Visit(Base):
 
     id = Column(INTEGER, primary_key=True, autoincrement=False)
     date = Column(DATE)
+    site = Column(VARCHAR(50))
     role = Column(Enum('C', 'P', 'IC', name='participant_role'))
     comment = Column(TEXT)
     participant_id = Column(ForeignKey('participant.id'), nullable=False)
