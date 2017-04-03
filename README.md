@@ -14,12 +14,13 @@ schema.
 ## Usage
 
 Example:
+
 `docker run --rm -e "DB_URL=postgresql://postgres:postgres@localhost:5432/postgres" hbpmip/data-catalog-setup upgrade
 head`
 
 ## Build
 
-Run: `build.sh`
+Run: `./build.sh`
 
 ## Test
 
