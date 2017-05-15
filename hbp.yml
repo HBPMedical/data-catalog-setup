@@ -74,6 +74,10 @@ planning:
     url: https://github.com/LREN-CHUV/data-catalog-setup/issues
 
 related_projects:
+  - name: docker-alembic
+    mip_building_block: infrastructure
+    relationship: depends-on-other
+    relationship_scope: build
   - name: data-tracking
     mip_building_block: data-factory
     relationship: other-depends-on

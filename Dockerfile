@@ -1,32 +1,10 @@
-FROM python:3.6.1-alpine
+FROM hbpmip/alembic:0.9.1-0
 
 MAINTAINER mirco.nasuti@chuv.ch
 
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
-
-########################################################################################################################
-# Install Dockerize
-########################################################################################################################
-
-ENV DOCKERIZE_VERSION='v0.4.0'
-RUN apk update && apk add wget postgresql-dev \
-    && wget -O /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-${DOCKERIZE_VERSION}.tar.gz \
-    && tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz \
-    && rm -rf /var/cache/apk/* /tmp/*
-
-########################################################################################################################
-# Install Alembic and Psycopg2
-########################################################################################################################
-ENV ALEMBIC_VERSION='0.8.10' \
-    PSYCOPG2_VERSION='2.6.2'
-
-RUN apk update \
-  && apk add --virtual build-deps gcc python3-dev musl-dev \
-  && apk add postgresql-dev \
-  && pip install --no-cache-dir alembic==$ALEMBIC_VERSION psycopg2==$PSYCOPG2_VERSION \
-  && apk del build-deps gcc
 
 ########################################################################################################################
 # Copy project files
