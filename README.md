@@ -7,8 +7,7 @@ Migration scripts for the Data Catalog database used to capture provenance infor
 
 ## Introduction
 
-The goal of this project is to provide a Docker container including Alembic and a Python model of the Data Catalog
-schema.
+The goal of this project is to provide a Docker container including Alembic and a Python model of the Data Catalog schema.
 
 ## Usage
 
