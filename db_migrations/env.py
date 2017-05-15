@@ -7,15 +7,14 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
-MRIDB_FOLDER = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+PROJECT_FOLDER = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
 from alembic import context
 from alembic.config import Config
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-config = Config(MRIDB_FOLDER+"/alembic.ini")
 
-sys.path.append(MRIDB_FOLDER)
+config = Config(PROJECT_FOLDER+"/alembic.ini")
+sys.path.append(PROJECT_FOLDER)
+
 from data_catalog_schema import Base
 
 # Interpret the config file for Python logging.
