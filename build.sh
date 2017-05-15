@@ -27,4 +27,7 @@ else
   CAPTAIN="sudo captain"
 fi
 
-$CAPTAIN build
+BUILD_DATE=$(date --iso-8601=seconds) \
+  VCS_REF=$(git describe --tags --dirty) \
+  VERSION=$(git describe --tags --dirty) \
+  $CAPTAIN build

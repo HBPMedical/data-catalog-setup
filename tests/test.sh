@@ -1,20 +1,43 @@
 #!/usr/bin/env bash
 
-echo "Starting a Postgres container..."
-postgres_container=$(docker run -d -p 5432:5432 postgres)
-sleep 5
+set -e
 
-echo "Searching for gateway IP..."
-GATEWAY_IP=$(ip addr | grep docker | grep inet | grep -Eo '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*')
+get_script_dir () {
+     SOURCE="${BASH_SOURCE[0]}"
 
-echo "Running a migration..."
-docker run --rm -e "DB_URL=postgresql://postgres:postgres@$GATEWAY_IP:5432/postgres" hbpmip/data-catalog-setup upgrade head
-ret=$?
+     while [ -h "$SOURCE" ]; do
+          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+          SOURCE="$( readlink "$SOURCE" )"
+          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+     done
+     cd -P "$( dirname "$SOURCE" )"
+     pwd
+}
 
-# Remove container if not on CircleCI
-if [ -z "$CIRCLECI" ] || [ "$CIRCLECI" = false ] ; then
-    echo "Removing the Postgres container..."
-    docker rm -f ${postgres_container}
+cd "$(get_script_dir)"
+
+if [ $NO_SUDO ]; then
+  DOCKER_COMPOSE="docker-compose"
+elif groups $USER | grep &>/dev/null '\bdocker\b'; then
+  DOCKER_COMPOSE="docker-compose"
+else
+  DOCKER_COMPOSE="sudo docker-compose"
 fi
 
-exit $ret
+$DOCKER_COMPOSE up -d test_db
+$DOCKER_COMPOSE run wait_dbs
+
+echo
+echo "Test database migration"
+$DOCKER_COMPOSE run data_catalog_setup
+$DOCKER_COMPOSE run data_catalog_db_check
+
+echo
+echo "Test idempotence"
+$DOCKER_COMPOSE run data_catalog_setup
+$DOCKER_COMPOSE run data_catalog_db_check
+
+# Cleanup
+echo
+$DOCKER_COMPOSE stop
+$DOCKER_COMPOSE rm -f > /dev/null 2> /dev/null

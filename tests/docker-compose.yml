@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+
+  test_db:
+    image: "postgres:9.6.2-alpine"
+    container_name: "test-db"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=testpwd
+
+  wait_dbs:
+    image: "waisbrot/wait"
+    links:
+      - "test_db:test_db"
+    environment:
+      - TARGETS=test_db:5432
+
+  # Use the latest image built as this is what is under test
+  data_catalog_setup:
+    image: "hbpmip/data-catalog-setup:latest"
+    container_name: "data-catalog-setup"
+    command: "upgrade head"
+    environment:
+      - DB_URL=postgresql://test:testpwd@db:5432/test
+    links:
+     - "test_db:db"
+
+  data_catalog_db_check:
+    image: "hbpmip/pgtap:0.96.0-3"
+    container_name: "data-datalog-db-check"
+    environment:
+      - HOST=db
+      - PORT=5432
+      - DATABASE=test
+      - USER=test
+      - PASSWORD=testpwd
+    volumes:
+      - ./sql:/test
+    links:
+      - "test_db:db"
