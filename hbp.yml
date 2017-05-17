@@ -66,7 +66,7 @@ distribution:
     current_tag: 1.5.22
     url: https://hub.docker.com/r/hbpmip/data-catalog-setup/
     badge: https://img.shields.io/badge/docker-hbpmip%2Fdata--catalog--setup-008bb8.svg
-    command: docker pull hbpmip/data-catalog-setup:2.1.2
+    command: docker pull hbpmip/data-catalog-setup:1.5.22
 
 planning:
   github:
