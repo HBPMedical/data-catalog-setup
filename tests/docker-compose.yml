@@ -28,7 +28,7 @@ services:
      - "test_db:db"
 
   data_catalog_db_check:
-    image: "hbpmip/pgtap:0.96.0-3"
+    image: "hbpmip/pgtap:0.96.0-5"
     container_name: "data-datalog-db-check"
     environment:
       - HOST=db
