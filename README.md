@@ -12,7 +12,7 @@ The goal of this project is to provide a Docker container including Alembic and 
 
 Example:
 
-`docker run --rm -e "DB_URL=postgresql://postgres:postgres@localhost:5432/postgres" hbpmip/data-catalog-setup:1.5.22 upgrade
+`docker run --rm -e "DB_URL=postgresql://postgres:postgres@localhost:5432/postgres" hbpmip/data-catalog-setup:1.6.0 upgrade
 head`
 
 ## Build
