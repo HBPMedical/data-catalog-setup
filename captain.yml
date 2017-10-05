@@ -1,4 +1,4 @@
-data_catalog_setup:
+target_image:
   build: Dockerfile
   image: hbpmip/data-catalog-setup
   pre:
