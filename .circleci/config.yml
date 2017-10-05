@@ -1,0 +1,43 @@
+---
+
+version: 2
+jobs:
+  build:
+    working_directory: ~/src
+    docker:
+      - image: hbpmip/docker-compose-for-ci:17.06-0
+    environment:
+       - CIRCLECI: true
+    steps:
+      - setup_remote_docker:
+          version: 17.06.0-ce
+      - checkout
+      - run:
+          name: "Install requirements"
+          command: |
+            docker --version
+            pre-commit install
+      - run:
+          name: "Validate code quality"
+          command: |
+            pre-commit run --all-files
+      - run:
+          name: "Build the project"
+          command: |
+            PATH=$PATH:/$HOME/.captain/bin/ ./build.sh
+      - run:
+          name: "Test with one dataset"
+          command: |
+            PATH=$PATH:/$HOME/.captain/bin/ ./tests/one-dataset/test.sh
+      - run:
+          name: "Test with several datasets"
+          command: |
+            PATH=$PATH:/$HOME/.captain/bin/ ./tests/several-datasets/test.sh
+      - run:
+          name: "Test creating a view joining tables"
+          command: |
+            PATH=$PATH:/$HOME/.captain/bin/ ./tests/joined-tables/test.sh
+      - run:
+          name: "Test creating a view for a union of tables"
+          command: |
+            PATH=$PATH:/$HOME/.captain/bin/ ./tests/union-of-tables/test.sh
