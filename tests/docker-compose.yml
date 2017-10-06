@@ -27,16 +27,17 @@ services:
     links:
      - "test_db:db"
 
+  # Issues with volume mounting here, workaround by building an image including the sources
   data_catalog_db_check:
-    image: "hbpmip/pgtap:0.96.0-5"
-    container_name: "data-datalog-db-check"
+    build:
+      context: .
+      dockerfile: Dockerfile.check
+    container_name: "data-catalog-db-check"
     environment:
       - HOST=db
       - PORT=5432
       - DATABASE=test
       - USER=test
       - PASSWORD=testpwd
-    volumes:
-      - ./sql:/test
     links:
       - "test_db:db"
